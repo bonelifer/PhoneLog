@@ -1,6 +1,6 @@
 # Caller ID Log Viewer
 
-A simple web-based Caller ID log viewer that reads `cidcall.log` and displays it in a user-friendly table format. The current implementation uses JavaScript to fetch and parse the log file, formatting the date and time for better readability, providing a lookup for unknown numbers, and offering features like log downloads and adjustable call history display.
+A simple web-based Caller ID log viewer that reads `cidcall.log` from NCID (Network Caller ID) and displays it in a user-friendly table format. The current implementation uses JavaScript to fetch and parse the log file, formatting the date and time for better readability, providing a lookup for unknown numbers, and offering features like log downloads and adjustable call history display.
 
 ## Features
 - **Displays caller information** (Date, Time, Number, Name)
@@ -18,14 +18,14 @@ A simple web-based Caller ID log viewer that reads `cidcall.log` and displays it
 ## Installation & Setup
 
 ### Prerequisites
-Ensure you have NCID (`ncid`) installed and running. The log file is typically stored in:
+Ensure you have NCID (`ncid`) installed and running - https://ncid.sourceforge.io/index.html. The log file is typically stored in:
 ```
 /var/log/ncid/cidcall.log
 ```
 
 ### Step 1: Clone the Repository
 ```sh
-git clone https://github.com/yourusername/caller-id-log-viewer.git
+git clone https://github.com/allanstevens/PhoneLog.git
 cd caller-id-log-viewer
 ```
 
@@ -55,7 +55,7 @@ systemctl restart nginx    # For Nginx
 ---
 
 ## Usage
-- Open the web page in a browser: `http://yourserver/caller-id-log-viewer`
+- Open the web page in a browser: `http://yourserver/PhoneLog`
 - Adjust the call log display using the dropdown menu
 - Click **Download Log** to save a copy of the log file
 - Unknown numbers can be clicked to search [who-called.co.uk](https://who-called.co.uk)
