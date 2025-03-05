@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caller ID Log</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 12px;
+            text-align: left;
+            word-wrap: break-word;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        a {
+            color: #1a73e8;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            table {
+                width: 100%;
+                font-size: 14px;
+            }
+            th, td {
+                padding: 10px;
+            }
+        }
+
+        /* Button styles */
+        .download-btn, .call-options {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        .download-btn:hover, .call-options:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Phone Log</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Number</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody id="logBody">
+            <tr><td colspan="4">Loading...</td></tr>
+        </tbody>
+    </table>
+
+    <select id="callLimit" class="call-options">
+        <option value="10">Last 10 Calls</option>
+        <option value="20">Last 20 Calls</option>
+        <option value="50">Last 50 Calls</option>
+        <option value="all">All Calls</option>
+    </select>
+
+    <button class="download-btn" id="downloadBtn">Download Log</button>
+
+    <audio id="beepSound">
+        <source src="ring.mp3" type="audio/wav">
+    </audio>
+
+    <script>
+        let previousLog = "";
+
+        function formatDate(dateStr) {
+            const month = dateStr.substring(0, 2);
+            const day = dateStr.substring(2, 4);
+            const year = dateStr.substring(4, 8);
+            const date = new Date(`${year}-${month}-${day}`);
+
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+
+            const dd = String(date.getDate()).padStart(2, '0');
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const yyyy = date.getFullYear();
+            const fullFormattedDate = `${dd}/${mm}/${yyyy}`;
+
+            if (date.toDateString() === today.toDateString()) {
+                return "Today";
+            } else if (date.toDateString() === yesterday.toDateString()) {
+                return "Yesterday";
+            }
+
+            return fullFormattedDate;
+        }
+
+        function formatTime(timeStr) {
+            return `${timeStr.substring(0, 2)}:${timeStr.substring(2, 4)}`;
+        }
+
+        async function loadCallLog() {
+            try {
+                const response = await fetch(`cidcall.log?nocache=${new Date().getTime()}`); // Cache-busting query
+                const text = await response.text(); 
+
+                if (text === previousLog) return; // Skip update if log hasn't changed
+
+                previousLog = text;
+
+                const logLines = text.trim().split("\n");
+                const logBody = document.getElementById("logBody");
+                logBody.innerHTML = "";
+
+                const limit = document.getElementById("callLimit").value;
+                const logToDisplay = (limit === 'all') ? logLines : logLines.slice(-parseInt(limit));
+
+                logToDisplay.reverse().forEach(line => {
+                    const match = line.match(/CID:\s*\*DATE\*(\d{8})\*TIME\*(\d{4})\*LINE\*POTS\*NMBR\*(\S+)\*MESG\*NONE\*NAME\*(.*)\*/);
+                    if (match) {
+                        const [_, date, time, number, name] = match;
+
+                        const displayNumber = (number === "WITHHELD" || number === "PRIVATE") ? "Withheld" : number;
+                        const nameDisplay = name.trim() === "NO NAME"
+                            ? `<a href="https://who-called.co.uk/Number/${number}" target="_blank">${displayNumber}</a>`
+                            : name.trim();
+
+                        const row = `<tr>
+                            <td>${formatDate(date)}</td>
+                            <td>${formatTime(time)}</td>
+                            <td>${displayNumber}</td>
+                            <td>${nameDisplay}</td>
+                        </tr>`;
+                        logBody.innerHTML += row;
+                    }
+                });
+
+                document.getElementById("beepSound").play(); // Beep notification for new calls
+
+            } catch (error) {
+                console.error("Error loading call log:", error);
+                document.getElementById("logBody").innerHTML = "<tr><td colspan='4'>Failed to load log</td></tr>";
+            }
+        }
+
+        function downloadLog() {
+            fetch('cidcall.log')
+                .then(response => response.text())
+                .then(text => {
+                    const blob = new Blob([text], { type: 'text/plain' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'cidcall.log';
+                    link.click();
+                })
+                .catch(error => console.error('Error downloading the log:', error));
+        }
+
+        setInterval(loadCallLog, 5000);
+        loadCallLog();
+
+        document.getElementById('downloadBtn').addEventListener('click', downloadLog);
+        document.getElementById('callLimit').addEventListener('change', loadCallLog);
+    </script>
+
+</body>
+</html>
