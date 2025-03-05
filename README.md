@@ -18,7 +18,9 @@ A simple web-based Caller ID log viewer that reads `cidcall.log` from NCID (Netw
 ## Installation & Setup
 
 ### Prerequisites
-Ensure you have NCID (`ncid`) installed and running - https://ncid.sourceforge.io/index.html. The log file is typically stored in:
+Ensure you have NCID (`ncid`) installed and running - https://ncid.sourceforge.io/index.html. 
+
+The log file is typically stored in:
 ```
 /var/log/ncid/cidcall.log
 ```
