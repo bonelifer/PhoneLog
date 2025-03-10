@@ -30,6 +30,7 @@ The log file is typically stored in:
 git clone https://github.com/allanstevens/PhoneLog.git
 cd caller-id-log-viewer
 ```
+Or just download the files from here.
 
 ### Step 2: Set Up Symbolic Link
 Since JavaScript in a browser cannot access system log files directly, you need to create a symbolic link in your web server's `www` directory:
@@ -68,26 +69,18 @@ systemctl restart nginx    # For Nginx
 ## Future Improvements & Later Versions
 The current JavaScript-based version is simple but can be improved significantly. Here are some potential enhancements:
 
-### **1. PHP-based Solution (Better Performance)**
+### **PHP-based Solution**
 Instead of using JavaScript to fetch the log file, a **PHP script** can read the file and serve it dynamically. This would:
 - Remove the need for a symbolic link (`ln -s`)
-- Allow real-time updates without needing a full reload
+- Allow real-time updates without needing a full reload accessed via seeking at the end or using tail, which would be more efficient then downlading the whole file via javascript
 - Improve security by restricting direct access to the log file
 
-### **2. Using `tail -f` for Live Updates (Best Solution)**
-A better approach than polling with JavaScript is using `tail -f` in a backend script:
-- **Method 1:** Use a WebSocket server to push updates from `tail -f`
-- **Method 2:** Use `PHP exec()` or `Node.js child_process` to stream new logs
-
-### **3. Authentication & Access Control**
+### **Authentication & Access Control**
 - Restrict log access using user authentication (e.g., login system)
 - Log and monitor access to caller history
 
-### **4. Alternative Solutions**
-While this setup works well for simple cases, other solutions might be better:
-- **NCID Client Apps**: Use an existing NCID web interface (e.g., `ncid-web`)
-- **Asterisk PBX**: If using VoIP, Asterisk provides a built-in call log web UI
-- **Home Assistant**: Integrate NCID into a smart home system
+### **Alternative Solutions**
+While this setup works well for simple cases, other solutions might be better.  Check out the [ncid.sourceforge.io](https://ncid.sourceforge.io) website for other solutions.
 
 ---
 
