@@ -1,195 +1,802 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Caller ID Log</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
-            background-color: #f9f9f9;
-        }
-        h1 {
-            color: #333;
-        }
-        table {
-            width: 100%;
-            max-width: 800px;
-            margin: 20px auto;
-            border-collapse: collapse;
-            table-layout: fixed;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 12px;
-            text-align: left;
-            word-wrap: break-word;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        a {
-            color: #1a73e8;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Caller ID Log</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --primary-color: #4a6bff;
+      --secondary-color: #f8f9fa;
+      --text-color: #333;
+      --light-text: #666;
+      --border-color: #e0e0e0;
+      --hover-color: #3a56d4;
+      --today-bg: #e8f4ff;
+      --yesterday-bg: #f5f5f5;
+    }
 
-        /* Mobile responsiveness */
-        @media (max-width: 600px) {
-            table {
-                width: 100%;
-                font-size: 14px;
-            }
-            th, td {
-                padding: 10px;
-            }
-        }
+    body {
+      font-family: "Roboto", sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f7fa;
+      color: var(--text-color);
+      line-height: 1.6;
+    }
 
-        /* Button styles */
-        .download-btn, .call-options {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #1a73e8;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            margin-right: 10px;
-        }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      padding: 25px;
+    }
 
-        .download-btn:hover, .call-options:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    h1 {
+      color: var(--primary-color);
+      margin-bottom: 25px;
+      font-weight: 700;
+      text-align: center;
+      font-size: 2rem;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .select-container,
+    .btn-container {
+      display: flex;
+      gap: 10px;
+    }
+
+    select,
+    button {
+      padding: 10px 15px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    select {
+      background-color: white;
+      min-width: 180px;
+    }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button:hover {
+      background-color: var(--hover-color);
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .footer-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .format-toggles {
+      display: flex;
+      gap: 15px;
+    }
+
+    .format-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--secondary-color);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.4s;
+      border-radius: 24px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+      background-color: var(--primary-color);
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(26px);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 20px;
+      overflow: hidden;
+      border-radius: 8px;
+    }
+
+    th {
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: 500;
+      padding: 15px;
+      text-align: left;
+      position: sticky;
+      top: 0;
+    }
+
+    td {
+      padding: 12px 15px;
+      border-bottom: 1px solid var(--border-color);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background-color: var(--secondary-color);
+    }
+
+    .today-row {
+      background-color: var(--today-bg);
+    }
+
+    .yesterday-row {
+      background-color: var(--yesterday-bg);
+    }
+
+    a {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+.badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 16px; /* Increased font size */
+    font-weight: 500;
+    background-color: #e0e0e0;
+    color: var(--text-color);
+}
+
+.badge-withheld {
+    background-color: #ffebee;
+    color: #c62828;
+    font-size: 16px; /* Match font size */
+}
+
+.badge-private {
+    background-color: #fff8e1;
+    color: #ff8f00;
+    font-size: 16px; /* Match font size */
+}
+
+
+
+    .status-bar {
+      padding: 10px;
+      background-color: var(--secondary-color);
+      border-radius: 6px;
+      text-align: center;
+      font-size: 14px;
+      color: var(--light-text);
+    }
+
+    @media (max-width: 768px) {
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .select-container,
+      .btn-container {
+        flex-direction: column;
+      }
+
+      select,
+      button {
+        width: 100%;
+      }
+
+      .footer-controls {
+        flex-direction: column;
+      }
+
+      .format-toggles {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .format-toggle {
+        flex-grow: 1;
+        justify-content: center;
+      }
+
+      th,
+      td {
+        padding: 10px 12px;
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 15px;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .format-toggles {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      th,
+      td {
+        padding: 8px 10px;
+        font-size: 13px;
+      }
+    }
+
+    /* Animation for new rows */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .new-call {
+      animation: fadeIn 0.5s ease-out;
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h1>📞 Caller ID Log</h1>
 
-    <h1>Phone Log</h1>
+    <div class="controls">
+      <div class="select-container">
+        <select id="callLimit" class="call-options">
+          <option value="10">Last 10 Calls</option>
+          <option value="20">Last 20 Calls</option>
+          <option value="50">Last 50 Calls</option>
+          <option value="all">All Calls</option>
+        </select>
+
+        <select id="filterOption" class="call-options">
+          <option value="all">All Calls</option>
+          <option value="today">Today</option>
+          <option value="yesterday">Yesterday</option>
+          <option value="withheld">Withheld/Private</option>
+          <option value="named">Named Callers</option>
+        </select>
+      </div>
+
+      <div class="btn-container">
+        <button class="download-btn" id="downloadBtn" title="Download Call Log">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Download Log
+        </button>
+
+        <button class="download-btn" id="refreshBtn" title="Refresh Call Log">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path
+              d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+            ></path>
+          </svg>
+          Refresh
+        </button>
+      </div>
+    </div>
+
     <table>
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Number</th>
-                <th>Name</th>
-            </tr>
-        </thead>
-        <tbody id="logBody">
-            <tr><td colspan="4">Loading...</td></tr>
-        </tbody>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Number</th>
+          <th>Caller</th>
+        </tr>
+      </thead>
+      <tbody id="logBody">
+        <tr>
+          <td colspan="4" style="text-align: center">Loading call log...</td>
+        </tr>
+      </tbody>
     </table>
 
-    <select id="callLimit" class="call-options">
-        <option value="10">Last 10 Calls</option>
-        <option value="20">Last 20 Calls</option>
-        <option value="50">Last 50 Calls</option>
-        <option value="all">All Calls</option>
-    </select>
+    <div class="footer-controls">
+      <div class="format-toggles">
+        <div class="format-toggle">
+          <span>UK (DD/MM)</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="dateFormatToggle" />
+            <span class="toggle-slider"></span>
+          </label>
+          <span>US (MM/DD)</span>
+        </div>
 
-    <button class="download-btn" id="downloadBtn">Download Log</button>
+        <div class="format-toggle">
+          <span>12-hour</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="timeFormatToggle" />
+            <span class="toggle-slider"></span>
+          </label>
+          <span>24-hour</span>
+        </div>
 
-    <audio id="beepSound">
-        <source src="ring.mp3" type="audio/wav">
-    </audio>
+        <!-- WHO-CALLED.CO.UK TOGGLE -->
+        <div class="format-toggle">
+          <span>Who-Called.co.uk Lookup</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="whoCalledToggle" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
 
-    <script>
-        let previousLog = "";
+      <div class="status-bar" id="statusBar">
+        Last updated: <span id="lastUpdated">Never</span> • Total calls:
+        <span id="totalCalls">0</span> • Showing: <span id="showingCount">0</span>
+      </div>
+    </div>
+  </div>
 
-        function formatDate(dateStr) {
-            const month = dateStr.substring(0, 2);
-            const day = dateStr.substring(2, 4);
-            const year = dateStr.substring(4, 8);
-            const date = new Date(`${year}-${month}-${day}`);
+  <audio id="beepSound">
+    <source src="ring.wav" type="audio/wav" />
+  </audio>
 
+  <script>
+    // Initialize variables
+    let previousLog = "";
+    let lastUpdateTime = null;
+    let newCallsCount = 0;
+
+    // Load format preferences from localStorage or use defaults
+    let dateFormat = localStorage.getItem("dateFormat") || "uk";
+    let timeFormat = localStorage.getItem("timeFormat") || "12h";
+    let whoCalledEnabled = localStorage.getItem("whoCalledEnabled") === "true";
+
+    // Initialize the page when DOM is loaded
+    document.addEventListener("DOMContentLoaded", function () {
+      // Set initial toggle states based on saved preferences
+      document.getElementById("dateFormatToggle").checked = dateFormat === "us";
+      document.getElementById("timeFormatToggle").checked = timeFormat === "24h";
+      document.getElementById("whoCalledToggle").checked = whoCalledEnabled;
+
+      // Set up event listeners
+      setupEventListeners();
+
+      // Load initial call log
+      loadCallLog();
+
+      // Set up auto-refresh every 5 seconds
+      setInterval(loadCallLog, 5000);
+    });
+
+    function setupEventListeners() {
+      document
+        .getElementById("downloadBtn")
+        .addEventListener("click", downloadLog);
+      document
+        .getElementById("refreshBtn")
+        .addEventListener("click", refreshLog);
+      document
+        .getElementById("callLimit")
+        .addEventListener("change", loadCallLog);
+      document
+        .getElementById("filterOption")
+        .addEventListener("change", loadCallLog);
+
+      // Date format toggle handler
+      document
+        .getElementById("dateFormatToggle")
+        .addEventListener("change", function () {
+          dateFormat = this.checked ? "us" : "uk";
+          localStorage.setItem("dateFormat", dateFormat);
+          loadCallLog();
+        });
+
+      // Time format toggle handler
+      document
+        .getElementById("timeFormatToggle")
+        .addEventListener("change", function () {
+          timeFormat = this.checked ? "24h" : "12h";
+          localStorage.setItem("timeFormat", timeFormat);
+          loadCallLog();
+        });
+
+      // Who-Called.co.uk toggle handler
+      document
+        .getElementById("whoCalledToggle")
+        .addEventListener("change", function () {
+          whoCalledEnabled = this.checked;
+          localStorage.setItem("whoCalledEnabled", whoCalledEnabled);
+          loadCallLog();
+        });
+    }
+
+    function refreshLog() {
+      console.log("Refresh button clicked");
+      previousLog = ""; // Force reload
+      newCallsCount = 0;
+      loadCallLog();
+    }
+
+    function formatNumber(number) {
+      if (number === "WITHHELD") {
+        return `<span class="badge badge-withheld">Withheld</span>`;
+      } else if (number === "PRIVATE") {
+        return `<span class="badge badge-private">Private</span>`;
+      }
+
+      const cleanNumber = number.replace(/\D/g, "");
+
+      // U.S. and Canada (country code +1)
+      if (
+        number.startsWith("+1") ||
+        (cleanNumber.length === 11 && cleanNumber.startsWith("1"))
+      ) {
+        const usNumber = cleanNumber.startsWith("1")
+          ? cleanNumber.slice(1)
+          : cleanNumber;
+        if (usNumber.length === 10) {
+          return `+1 (${usNumber.slice(0, 3)}) ${usNumber.slice(
+            3,
+            6
+          )}-${usNumber.slice(6)}`;
+        }
+        return `+1 ${usNumber}`; // fallback
+      }
+
+      // UK (+44 or 0 prefix)
+      if (
+        number.startsWith("+44") ||
+        cleanNumber.startsWith("44") ||
+        cleanNumber.startsWith("0")
+      ) {
+        let ukNumber = cleanNumber;
+        if (ukNumber.startsWith("44")) ukNumber = ukNumber.slice(2);
+        if (ukNumber.startsWith("0")) ukNumber = ukNumber.slice(1);
+
+        if (ukNumber.length === 10) {
+          return `+44 ${ukNumber.slice(0, 4)} ${ukNumber.slice(
+            4,
+            7
+          )} ${ukNumber.slice(7)}`;
+        }
+        return `+44 ${ukNumber}`;
+      }
+
+      // Generic international number
+      if (number.startsWith("+")) {
+        const match = number.match(/^\+(\d{1,4})(\d+)/);
+        if (match) {
+          return `+${match[1]} ${match[2]}`;
+        }
+      }
+
+      // Fallback: just return grouped local number if 10 digits
+      if (cleanNumber.length === 10) {
+        return `(${cleanNumber.slice(0, 3)}) ${cleanNumber.slice(
+          3,
+          6
+        )}-${cleanNumber.slice(6)}`;
+      }
+
+      return number;
+    }
+
+    function formatDate(dateStr, format) {
+      if (dateStr === "Today") return `<span class="badge">Today</span>`;
+      if (dateStr === "Yesterday") return `<span class="badge">Yesterday</span>`;
+
+      const month = dateStr.substring(0, 2);
+      const day = dateStr.substring(2, 4);
+      const year = dateStr.substring(4, 8);
+
+      if (format === "us") {
+        return `${month}/${day}/${year}`;
+      } else {
+        return `${day}/${month}/${year}`;
+      }
+    }
+
+    function formatTime(timeStr, format) {
+      const hours = parseInt(timeStr.substring(0, 2), 10);
+      const minutes = timeStr.substring(2, 4);
+
+      if (format === "24h") {
+        return `${hours.toString().padStart(2, "0")}:${minutes}`;
+      } else {
+        const ampm = hours >= 12 ? "PM" : "AM";
+        const twelveHour = hours % 12 || 12;
+        return `${twelveHour}:${minutes} ${ampm}`;
+      }
+    }
+
+    function updateStatusBar(totalCalls, showingCount) {
+      document.getElementById("totalCalls").textContent = totalCalls;
+      document.getElementById("showingCount").textContent = showingCount;
+
+      if (lastUpdateTime) {
+        const options = {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: timeFormat === "12h",
+        };
+        document.getElementById("lastUpdated").textContent =
+          lastUpdateTime.toLocaleTimeString(undefined, options);
+      }
+    }
+
+    function whoCalledLookupUrl(number) {
+      // Remove all non-digit characters
+      const digitsOnly = number.replace(/\D/g, "");
+      // Normalize UK numbers for who-called.co.uk
+      if (digitsOnly.startsWith("44")) {
+        return `https://who-called.co.uk/number/${digitsOnly}`;
+      } else if (digitsOnly.startsWith("0")) {
+        return `https://who-called.co.uk/number/44${digitsOnly.substring(1)}`;
+      } else if (digitsOnly.length === 10) {
+        return `https://who-called.co.uk/number/44${digitsOnly}`;
+      }
+      return `https://who-called.co.uk/number/${digitsOnly}`;
+    }
+
+    async function loadCallLog() {
+      try {
+        //console.log("Loading call log...");
+        const response = await fetch(`cidcall.log?nocache=${Date.now()}`);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const text = await response.text();
+        lastUpdateTime = new Date();
+
+        if (text === previousLog) {
+          // No changes, just update status bar with existing counts
+          updateStatusBar(
+            document.getElementById("totalCalls").textContent,
+            document.getElementById("showingCount").textContent
+          );
+          return;
+        }
+
+        // Calculate new calls count
+        const previousLinesCount = previousLog
+          ? previousLog.trim().split("\n").length
+          : 0;
+        const currentLinesCount = text.trim().split("\n").length;
+        newCallsCount = currentLinesCount - previousLinesCount;
+        previousLog = text;
+
+        const logLines = text.trim().split("\n");
+        const logBody = document.getElementById("logBody");
+
+        const limit = document.getElementById("callLimit").value;
+        const filter = document.getElementById("filterOption").value;
+
+        let logToDisplay =
+          limit === "all" ? logLines : logLines.slice(-parseInt(limit));
+        let totalFiltered = 0;
+
+        logBody.innerHTML = "";
+
+        if (logLines.length === 0 || (logLines.length === 1 && logLines[0] === "")) {
+          logBody.innerHTML = `<tr><td colspan="4" style="text-align: center;">No calls in log</td></tr>`;
+          updateStatusBar(0, 0);
+          return;
+        }
+
+        // Reverse to show newest calls first
+        logToDisplay.reverse().forEach((line, index) => {
+          if (!line.trim()) return; // Skip empty lines
+
+          const match = line.match(
+            /CID:\s*\*DATE\*(\d{8})\*TIME\*(\d{4})\*LINE\*POTS\*NMBR\*(\S+)\*MESG\*NONE\*NAME\*(.*)\*/
+          );
+          if (match) {
+            const [, date, time, number, name] = match;
+            const dateObj = new Date(
+              `${date.substring(4, 8)}-${date.substring(0, 2)}-${date.substring(2, 4)}`
+            );
+
+            // Filters
             const today = new Date();
             const yesterday = new Date(today);
             yesterday.setDate(today.getDate() - 1);
 
-            const dd = String(date.getDate()).padStart(2, '0');
-            const mm = String(date.getMonth() + 1).padStart(2, '0');
-            const yyyy = date.getFullYear();
-            const fullFormattedDate = `${dd}/${mm}/${yyyy}`;
+            if (filter === "today" && dateObj.toDateString() !== today.toDateString())
+              return;
+            if (
+              filter === "yesterday" &&
+              dateObj.toDateString() !== yesterday.toDateString()
+            )
+              return;
+            if (filter === "withheld" && !["WITHHELD", "PRIVATE"].includes(number))
+              return;
+            if (filter === "named" && name.trim() === "NO NAME") return;
 
-            if (date.toDateString() === today.toDateString()) {
-                return "Today";
-            } else if (date.toDateString() === yesterday.toDateString()) {
-                return "Yesterday";
+            totalFiltered++;
+
+            const displayNumber = formatNumber(number);
+            const trimmedName = name.trim() === "" ? "NO NAME" : name.trim();
+
+            let nameDisplay = trimmedName;
+            if (
+              whoCalledEnabled &&
+              !["WITHHELD", "PRIVATE", "NO NAME"].includes(trimmedName)
+            ) {
+              const lookupUrl = whoCalledLookupUrl(number);
+              nameDisplay = `<a href="${lookupUrl}" target="_blank" rel="noopener noreferrer">${trimmedName}</a>`;
             }
 
-            return fullFormattedDate;
-        }
-
-        function formatTime(timeStr) {
-            return `${timeStr.substring(0, 2)}:${timeStr.substring(2, 4)}`;
-        }
-
-        async function loadCallLog() {
-            try {
-                const response = await fetch(`cidcall.log?nocache=${new Date().getTime()}`); // Cache-busting query
-                const text = await response.text(); 
-
-                if (text === previousLog) return; // Skip update if log hasn't changed
-
-                previousLog = text;
-
-                const logLines = text.trim().split("\n");
-                const logBody = document.getElementById("logBody");
-                logBody.innerHTML = "";
-
-                const limit = document.getElementById("callLimit").value;
-                const logToDisplay = (limit === 'all') ? logLines : logLines.slice(-parseInt(limit));
-
-                logToDisplay.reverse().forEach(line => {
-                    const match = line.match(/CID:\s*\*DATE\*(\d{8})\*TIME\*(\d{4})\*LINE\*POTS\*NMBR\*(\S+)\*MESG\*NONE\*NAME\*(.*)\*/);
-                    if (match) {
-                        const [_, date, time, number, name] = match;
-
-                        const displayNumber = (number === "WITHHELD" || number === "PRIVATE") ? "Withheld" : number;
-                        const nameDisplay = name.trim() === "NO NAME"
-                            ? `<a href="https://who-called.co.uk/Number/${number}" target="_blank">${displayNumber}</a>`
-                            : name.trim();
-
-                        const row = `<tr>
-                            <td>${formatDate(date)}</td>
-                            <td>${formatTime(time)}</td>
-                            <td>${displayNumber}</td>
-                            <td>${nameDisplay}</td>
-                        </tr>`;
-                        logBody.innerHTML += row;
-                    }
-                });
-
-                document.getElementById("beepSound").play(); // Beep notification for new calls
-
-            } catch (error) {
-                console.error("Error loading call log:", error);
-                document.getElementById("logBody").innerHTML = "<tr><td colspan='4'>Failed to load log</td></tr>";
+            // Highlight today's and yesterday's calls with background color
+            let rowClass = "";
+            if (dateObj.toDateString() === today.toDateString()) {
+              rowClass = "today-row";
+            } else if (dateObj.toDateString() === yesterday.toDateString()) {
+              rowClass = "yesterday-row";
             }
+
+            // Highlight new calls since last load
+            const isNewCall = index < newCallsCount;
+
+            const tr = document.createElement("tr");
+            if (rowClass) tr.classList.add(rowClass);
+            if (isNewCall) tr.classList.add("new-call");
+
+            tr.innerHTML = `
+              <td>${formatDate(date, dateFormat)}</td>
+              <td>${formatTime(time, timeFormat)}</td>
+              <td>${displayNumber}</td>
+              <td>${nameDisplay}</td>
+            `;
+            logBody.appendChild(tr);
+          }
+        });
+
+        if (totalFiltered === 0) {
+          logBody.innerHTML = `<tr><td colspan="4" style="text-align: center;">No calls match the filter criteria.</td></tr>`;
         }
 
-        function downloadLog() {
-            fetch('cidcall.log')
-                .then(response => response.text())
-                .then(text => {
-                    const blob = new Blob([text], { type: 'text/plain' });
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob);
-                    link.download = 'cidcall.log';
-                    link.click();
-                })
-                .catch(error => console.error('Error downloading the log:', error));
+        updateStatusBar(logLines.length, totalFiltered);
+
+        // Play beep if new calls arrived
+        if (newCallsCount > 0) {
+          const beep = document.getElementById("beepSound");
+          beep.play().catch(() => {
+            // Audio playback might be blocked by browser autoplay policy
+          });
         }
+      } catch (error) {
+        console.error("Error loading call log:", error);
+        document.getElementById("logBody").innerHTML = `<tr>
+          <td colspan="4" style="text-align: center; color: red;">
+            Error loading call log. Please try refreshing.
+          </td>
+        </tr>`;
+      }
+    }
 
-        setInterval(loadCallLog, 5000);
-        loadCallLog();
-
-        document.getElementById('downloadBtn').addEventListener('click', downloadLog);
-        document.getElementById('callLimit').addEventListener('change', loadCallLog);
-    </script>
-
+    function downloadLog() {
+      if (!previousLog) {
+        alert("Call log is not loaded yet.");
+        return;
+      }
+      const blob = new Blob([previousLog], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `cidcall-${new Date().toISOString().slice(0, 10)}.log`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
 </body>
 </html>
+
